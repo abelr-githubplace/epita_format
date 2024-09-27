@@ -1,84 +1,36 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-
-typedef struct {
-    int year;
-    int month;
-    int day;
-    int hour;
-    int minute;
-    int second;
-    int timezone_offset; // in minutes
-} DateTime;
-
-void set_date(DateTime *dt, int year, int month, int day) {
-    dt->year = year;
-    dt->month = month;
-    dt->day = day;
-}
-
-void set_time(DateTime *dt, int hour, int minute, int second) {
-    dt->hour = hour;
-    dt->minute = minute;
-    dt->second = second;
-}
-
-void set_timezone(DateTime *dt, int offset) {
-    dt->timezone_offset = offset;
-}
-
-void get_date(const DateTime *dt, int *year, int *month, int *day) {
-    *year = dt->year;
-    *month = dt->month;
-    *day = dt->day;
-}
-
-void get_time(const DateTime *dt, int *hour, int *minute, int *second) {
-    *hour = dt->hour;
-    *minute = dt->minute;
-    *second = dt->second;
-}
-
-void get_timezone(const DateTime *dt, int *offset) {
-    *offset = dt->timezone_offset;
-}
-
-void convert_timezone(DateTime *dt, int new_offset) {
-    int offset_difference = new_offset - dt->timezone_offset;
-    dt->timezone_offset = new_offset;
-
-    int total_minutes = (dt->hour * 60 + dt->minute) + offset_difference;
-    dt->hour = (total_minutes / 60) % 24;
-    dt->minute = total_minutes % 60;
-}
-
-void print_datetime(const DateTime *dt) {
-    printf("Date: %04d-%02d-%02d\n", dt->year, dt->month, dt->day);
-    printf("Time: %02d:%02d:%02d (UTC%+d)\n", dt->hour, dt->minute, dt->second, dt->timezone_offset / 60);
-}
-
-int is_leap_year(int year) {
-    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
-}
-
-int days_in_month(int year, int month) {
-    if (month == 2) {
-        return is_leap_year(year) ? 29 : 28;
-    }
-    return (month == 4 || month == 6 || month == 9 || month == 11) ? 30 : 31;
-}
-
-int validate_date(int year, int month, int day) {
-    if (month < 1 || month > 12 || day < 1) return 0;
-    return day <= days_in_month(year, month);
-}
-
-int validate_time(int hour, int minute, int second) {
-    return (hour >= 0 && hour < 24) && (minute >= 0 && minute < 60) && (second >= 0 && second < 60);
-}
-
-int validate_datetime(const DateTime *dt) {
-    return validate_date(dt->year, dt->month, dt->day) && validate_time(dt->hour, dt->minute, dt->second);
-}
+#include <math.h>
+float factorial(float n);
+typedef struct FloatClass {float value;};
+float factorial(float n) {float result=1.0;for(int i=1;i<=n;i++) {result*=i;}return result;}
+float addFloatClassToFloat(FloatClass f, float b) {return f.value+b;}
+float addFloatClassToInt(FloatClass f, int b) {return f.value+b;}
+float addFloatClassToChar(FloatClass f, char b) {return f.value+b;}
+float addFloatClassToShort(FloatClass f, short b) {return f.value+b;}
+float addFloatClassToDouble(FloatClass f, double b) {return f.value+b;}
+float subFloatClassToFloat(FloatClass f, float b) {return f.value-b;}
+float subFloatClassToInt(FloatClass f, int b) {return f.value-b;}
+float subFloatClassToChar(FloatClass f, char b) {return f.value-b;}
+float subFloatClassToShort(FloatClass f, short b) {return f.value-b;}
+float subFloatClassToDouble(FloatClass f, double b) {return f.value-b;}
+float divFloatClassToFloat(FloatClass f, float b) {return f.value/b;}
+float divFloatClassToInt(FloatClass f, int b) {return f.value/b;}
+float divFloatClassToChar(FloatClass f, char b) {return f.value/b;}
+float divFloatClassToShort(FloatClass f, short b) {return f.value/b;}
+float divFloatClassToDouble(FloatClass f, double b) {return f.value/b;}
+float multFloatClassToFloat(FloatClass f, float b) {return f.value*b;}
+float multFloatClassToInt(FloatClass f, int b) {return f.value*b;}
+float multFloatClassToChar(FloatClass f, char b) {return f.value*b;}
+float multFloatClassToShort(FloatClass f, short b) {return f.value*b;}
+float multFloatClassToDouble(FloatClass f, double b) {return f.value*b;}
+float sqrtFloatClass(FloatClass f) {return sqrt(f.value);}
+float powFloatClassToFloat(FloatClass f, float b) {return pow(f.value, b);}
+float powFloatClassToInt(FloatClass f, int b) {return pow(f.value, b);}
+float powFloatClassToChar(FloatClass f, char b) {return pow(f.value, b);}
+float powFloatClassToShort(FloatClass f, short b) {return pow(f.value, b);}
+float powFloatClassToDouble(FloatClass f, double b) {return pow(f.value, b);}
+float inverseFloatClass(FloatClass f) {return 1.0/f.value;}
+/**
+** liefezpuebfuzs
+*/
+int main() {FloatClass f1;f1.value=5.0;float result;result=addFloatClassToFloat(f1, 3.0);printf("Add FloatClass to float: %.2f\n", result);result=addFloatClassToInt(f1, 2);printf("Add FloatClass to int: %.2f\n", result);result=addFloatClassToChar(f1, 'a');printf("Add FloatClass to char: %.2f\n", result);result=addFloatClassToShort(f1, 10);printf("Add FloatClass to short: %.2f\n", result);result=addFloatClassToDouble(f1, 2.5);printf("Add FloatClass to double: %.2f\n", result);result=subFloatClassToFloat(f1, 3.0);printf("Subtract float from FloatClass: %.2f\n", result);result=subFloatClassToInt(f1, 2);printf("Subtract int from FloatClass: %.2f\n", result);result=subFloatClassToChar(f1, 'a');printf("Subtract char from FloatClass: %.2f\n", result);result=subFloatClassToShort(f1, 10);printf("Subtract short from FloatClass: %.2f\n", result);result=subFloatClassToDouble(f1, 2.5);printf("Subtract double from FloatClass: %.2f\n", result);result=divFloatClassToFloat(f1, 3.0);printf("Divide FloatClass by float: %.2f\n", result);result=divFloatClassToInt(f1, 2);printf("Divide FloatClass by int: %.2f\n", result);result=divFloatClassToChar(f1, 'a');printf("Divide FloatClass by char: %.2f\n", result);result=divFloatClassToShort(f1, 10);printf("Divide FloatClass by short: %.2f\n", result);result=divFloatClassToDouble(f1, 2.5);printf("Divide FloatClass by double: %.2f\n", result);result=multFloatClassToFloat(f1, 3.0);printf("Multiply FloatClass by float: %.2f\n", result);result=multFloatClassToInt(f1, 2);printf("Multiply FloatClass by int: %.2f\n", result);result=multFloatClassToChar(f1, 'a');printf("Multiply FloatClass by char: %.2f\n", result);result=multFloatClassToShort(f1, 10);printf("Multiply FloatClass by short: %.2f\n", result);result=multFloatClassToDouble(f1, 2.5);printf("Multiply FloatClass by double: %.2f\n", result);result=sqrtFloatClass(f1);printf("Square root of FloatClass: %.2f\n", result);result=powFloatClassToFloat(f1, 3.0);printf("FloatClass raised to the power of float: %.2f\n", result);result=powFloatClassToInt(f1, 2);printf("FloatClass raised to the power of int: %.2f\n", result);result=powFloatClassToChar(f1, 'a');printf("FloatClass raised to the power of char: %.2f\n", result);result=powFloatClassToShort(f1, 10);printf("FloatClass raised to the power of short: %.2f\n", result);result=powFloatClassToDouble(f1, 2.5);printf("FloatClass raised to the power of double: %.2f\n", result);result=inverseFloatClass(f1);printf("Inverse of FloatClass: %.2f\n", result);return 0;}
