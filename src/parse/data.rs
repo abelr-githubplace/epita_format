@@ -1,9 +1,11 @@
 use super::{
     config::Config,
+    file_type::{file_type, FTYPE},
     syntax::{Kind, SyntaxError},
 };
+use crate::print::pretty::Pretty;
 
-/// Maximum of functions per file
+/// Maximum of exported functions per file
 const MAX_FUNCTIONS_ALLOWED: usize = 10;
 /// Maximum of lines per functions
 const MAX_LINES_ALLOWED: usize = 25;
@@ -24,6 +26,7 @@ macro_rules! rule {
 #[derive(Default)]
 pub struct Data {
     filename: String,
+    ftype: FTYPE,
     line: String,
     line_count: usize,
     func_len: usize,
@@ -33,12 +36,27 @@ pub struct Data {
     pub config: Config,
 }
 
+/// Data class implementation
 impl Data {
+    /// Get current file
     pub fn get_file(&self) -> String {
         self.filename.to_owned()
     }
 
-    pub fn reset_file(&mut self, filename: &str) {
+    /// Reset all data appart from the config and set the new file in
+    /// Returns an error if the file is not supported
+    pub fn reset_file(&mut self, filename: &str) -> Result<(), String> {
+        self.ftype = match file_type(filename, &self.config) {
+            FTYPE::C => FTYPE::C,
+            FTYPE::H => FTYPE::H,
+            _ => {
+                return Err(format!(
+                    "{} Unsupported file {filename}",
+                    Pretty::fail("ERROR:")
+                ));
+            }
+        };
+
         self.filename = filename.to_owned();
         self.line = String::new();
         self.line_count = 1;
@@ -46,30 +64,13 @@ impl Data {
         self.func_count = 0;
         self.in_comment = false;
         self.in_func = false;
+
+        Ok(())
     }
 
-    pub fn set_line(&mut self, line: &str) {
-        self.line = line.to_owned();
-    }
-
+    /// Get the line number
     pub fn get_line_number(&self) -> usize {
         self.line_count
-    }
-
-    pub fn get_func_count(&self) -> usize {
-        self.func_count
-    }
-
-    pub fn get_func_len(&self) -> usize {
-        self.func_len
-    }
-
-    pub fn func_line(&mut self) {
-        self.func_len += 1;
-    }
-
-    pub fn next(&mut self) {
-        self.line_count += 1;
     }
 
     // Calls for rule functions
@@ -83,6 +84,8 @@ impl Data {
     rule!(rule_invalid_comment, is_invalid_comment);
     rule!(rule_cast, is_cast);
     rule!(rule_func_proto, is_func_proto);
+    rule!(rule_goto, is_goto);
+    rule!(rule_typedef, is_typedef);
 
     /// Rule function: is for misformatted multiline comments
     fn rule_comment(&mut self) -> bool {
@@ -128,15 +131,19 @@ impl Data {
             self.func_len = 0;
             return self.func_len <= MAX_LINES_ALLOWED;
         }
-        self.func_line();
+        self.func_len += 1;
         true
     }
 }
 
-/// Combine all rule is for syntax errors
-pub fn rules(data: &mut Data, errors: &mut SyntaxError) -> Result<(), String> {
+/// Combine all rule check for syntax errors
+pub fn rules(line: &str, data: &mut Data, errors: &mut SyntaxError) {
+    // Set new line in
+    data.line = line.to_owned();
+
+    // Check all rules
     if !data.rule_comment() {
-        errors.add(data, Kind::Comment, "Misformatted comment");
+        errors.add(data, Kind::Comment, "Misformatted comment.");
     }
     if data.rule_has_brace() && !data.rule_opened_or_closed_brace() {
         errors.add(data, Kind::Brace, "All braces must be on their own line.");
@@ -144,18 +151,30 @@ pub fn rules(data: &mut Data, errors: &mut SyntaxError) -> Result<(), String> {
     if data.rule_cast() {
         errors.add(data, Kind::Cast, "No casts allowed.");
     }
-    if data.rule_func_proto() {
+    if data.ftype == FTYPE::C && data.rule_func_proto() {
         errors.add(data, Kind::Prototypes, "No function prototypes allowed.");
     }
     if !data.rule_func_len() {
         errors.add(data, Kind::LongFunction, "More than 25 lines in function.");
     }
-    if !data.rule_func_count() {
+    if data.ftype == FTYPE::H && !data.rule_func_count() {
         errors.add(
             data,
             Kind::TooManyFunctions,
             "More than 10 functions in file.",
         );
     }
-    Ok(())
+    if data.rule_goto() {
+        errors.add(data, Kind::Goto, "No goto statements allowed.");
+    }
+    if data.rule_typedef() {
+        errors.add(
+            data,
+            Kind::Typedef,
+            "No typedef alias allowed for structs or unions.",
+        );
+    }
+
+    // Add a line to the file
+    data.line_count += 1;
 }

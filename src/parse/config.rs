@@ -1,9 +1,9 @@
 use regex::Regex;
 
 /// Raw string for types
-const TYPE: &str = r"((const|void|char|short|int|long|usize_t|ssize_t|float|double|\*)[ ]*)+";
+const TYPE: &str = r"((const|void|char|short|int|long|usize_t|ssize_t|float|double|\*)( )?)+";
 /// Raw string for identifiers
-const IDENT: &str = r"([a-z][a-z0-9_]*)";
+const IDENT: &str = r"([a-z_][a-z0-9_]*)";
 /// Raw string for any number of spaces
 const ANY_SPACE: &str = r"[ ]*";
 /// Raw string for opening curly brace
@@ -20,6 +20,8 @@ const MULTI_COMMENT_BEGIN: &str = r"/\*(\*)?";
 const COMMENT_END: &str = r"\*/";
 /// Raw string for goto statement
 const GOTO: &str = r"^.*(goto) .*$";
+/// Raw string for typedef statement
+const TYPEDEF: &str = r"^typedef (struct|union).*$";
 
 /// Create the Config class from fields, methods name and regex string
 macro_rules! config {
@@ -50,9 +52,12 @@ macro_rules! config {
 
 // Call for Config class creation
 config!(
-    supported_file,
-    is_supported_file,
-    r"^(\.)?[a-z_/]+\.(c|h)$",
+    c_file,
+    is_c_file,
+    r"^(\.)?[a-z_/]+\.c$",
+    header,
+    is_header,
+    r"^(\.)?[a-z_/]+\.h$",
     multi_comment_begin,
     is_multi_comment_begin,
     MULTI_COMMENT_BEGIN,
@@ -70,14 +75,10 @@ config!(
     &format!("^.*\\([ ]*(unsigned[ ]+|signed[ ]+)?{TYPE}\\).*$"),
     func_decl,
     is_func_decl,
-    &format!(
-        "^(inline)?[ ]+(static)?[ ]+{TYPE}{IDENT}+{ANY_SPACE}\\({ANY_SPACE}{TYPE}{IDENT}*{ANY_SPACE}\\)$"
-    ),
+    &format!("^(inline )?(static )?{TYPE}([a-z_][a-zA-Z0-9_]*)\\(.*\\).*$"),
     func_proto,
     is_func_proto,
-    &format!(
-        "^(inline)?[ ]+(static)?[ ]+{TYPE}{IDENT}+{ANY_SPACE}\\({ANY_SPACE}{TYPE}{IDENT}*{ANY_SPACE}\\)$;"
-    ),
+    &format!("^(inline )?(static )?{TYPE}{IDENT}\\(({TYPE}{IDENT}(, )?){{1,4}}\\);$"),
     opened_brace,
     is_opened_brace,
     OPENED_BRACE_LINE,
@@ -92,5 +93,8 @@ config!(
     HAS_BRACE,
     goto,
     is_goto,
-    GOTO
+    GOTO,
+    typedef,
+    is_typedef,
+    TYPEDEF
 );
