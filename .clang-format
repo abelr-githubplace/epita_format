@@ -1,12 +1,12 @@
 Language: Cpp
 
-# Use 80 columns. (2.1)
+# Use 80 columns.
 ColumnLimit: 79
 
-# Indentation MUST be done using whitespaces only (2.2)
+# Indentation MUST be done using whitespaces only.
 UseTab: Never
 
-# Regex denoting the diff #include categories used for ordering them. (5.11)
+# Regex denoting the diff #include categories used for ordering them.
 IncludeCategories:
   - Regex: '".*"'
     Priority: 1
@@ -17,11 +17,11 @@ IncludeCategories:
 # Merge multiple #include blocks together and sort as one.
 IncludeBlocks: Merge
 
-# Tabulation. (6.4)
+# Tabulation.
 IndentWidth: 4
 TabWidth: 4
 
-# Make all braces {} on new line. (6.5)
+# Make all braces {} on new line.
 BreakBeforeBraces: Custom
 BraceWrapping:
   AfterClass: false
@@ -35,24 +35,24 @@ BraceWrapping:
   BeforeCatch: true
   BeforeElse: true
 
-# Pointer and reference alignment style (7.2)
+# Pointer and reference alignment style.
 PointerAlignment: Right
 
-# Add space before assignment operators. (7.15)
+# Add space before assignment operators.
 SpaceBeforeAssignmentOperators: true
 
 # Break before operators. (7.17)
 BreakBeforeBinaryOperators: All
 BreakBeforeTernaryOperators: true
 
-# Spaces will not be inserted after ( and before ). (7.18)
+# Spaces will not be inserted after ( and before ).
 SpacesInParentheses: false
 # Spaces may not be inserted into C style casts.
 SpacesInCStyleCastParentheses: false
 # Spaces may not be inserted into ().
 SpaceInEmptyParentheses: false
 
-# Indent case labels one level from the switch statement. (7.27)
+# Indent case labels one level from the switch statement.
 IndentCaseLabels: true
 
 # Horizontally aligns arguments after an open bracket.

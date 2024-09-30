@@ -3,15 +3,13 @@ use regex::Regex;
 /// Raw string for types
 const TYPE: &str = r"((const|void|char|short|int|long|usize_t|ssize_t|float|double|\*)( )?)+";
 /// Raw string for identifiers
-const IDENT: &str = r"([a-z_][a-zA-Z0-9_]*)";
+const IDENT: &str = r"([a-zA-Z_][a-zA-Z0-9_]*)";
 /// Raw string for any number of spaces
 const ANY_SPACE: &str = r"[ ]*";
 /// Raw string for opening curly brace
 const OPENED_BRACE_LINE: &str = r"^\{$";
 /// Raw string for closing curly brace
 const CLOSED_BRACE_LINE: &str = r"^}( //.*)?$";
-/// Raw string for opened or closed brace
-const OPENED_OR_CLOSED_BRACE: &str = r"^[ ]*[{}](;)?([ ]*//(/)? .*)?([ ]*/\* .* \*/)?$";
 /// Raw string for brace
 const HAS_BRACE: &str = r"^.*[{}].*$";
 /// Raw string for opening multiline comment
@@ -22,6 +20,10 @@ const COMMENT_END: &str = r"\*/";
 const GOTO: &str = r"^.*(goto) .*$";
 /// Raw string for typedef statement
 const TYPEDEF: &str = r"^typedef (struct|union).*$";
+/// Raw string for 80 char per line
+const LINE_80: &str = r"^.{0,80}$";
+/// Raw string for single line comment
+const SINGLE_LINE_COMMENT: &str = r"( //.*)?";
 
 /// Create the Config class from fields, methods name and regex string
 macro_rules! config {
@@ -75,10 +77,10 @@ config!(
     &format!("^.*\\([ ]*(unsigned[ ]+|signed[ ]+)?{TYPE}\\).*$"),
     func_decl,
     is_func_decl,
-    &format!("^(inline )?(static )?{TYPE}{IDENT}\\(.*\\)$"),
+    &format!("^(inline )?(static )?{TYPE}{IDENT}\\(.*\\){SINGLE_LINE_COMMENT}$"),
     func_proto,
     is_func_proto,
-    &format!("^(inline )?(static )?{TYPE}{IDENT}\\(.*\\);$"),
+    &format!("^(inline )?(static )?{TYPE}{IDENT}\\(.*\\);{SINGLE_LINE_COMMENT}$"),
     opened_brace,
     is_opened_brace,
     OPENED_BRACE_LINE,
@@ -87,7 +89,7 @@ config!(
     CLOSED_BRACE_LINE,
     open_or_close_brace,
     is_opened_or_closed_brace,
-    OPENED_OR_CLOSED_BRACE,
+    &format!("^{ANY_SPACE}[{{}}]( while{ANY_SPACE}\\(.*\\))?(;)?({ANY_SPACE}//(/)? .*)?({ANY_SPACE}/\\* .* \\*/)?$"),
     has_brace,
     has_brace,
     HAS_BRACE,
@@ -96,5 +98,8 @@ config!(
     GOTO,
     typedef,
     is_typedef,
-    TYPEDEF
+    TYPEDEF,
+    line_80,
+    is_line_80,
+    LINE_80
 );

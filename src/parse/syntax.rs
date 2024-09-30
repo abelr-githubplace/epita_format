@@ -9,6 +9,7 @@ pub enum Kind {
     Brace,
     Comment,
     Typedef,
+    LongLine,
     Prototypes,
     LongFunction,
     TooManyFunctions,
@@ -22,6 +23,7 @@ struct Stats {
     braces: usize,
     typedef: usize,
     comments: usize,
+    long_lines: usize,
     prototypes: usize,
     long_functions: usize,
     many_functions: usize,
@@ -35,6 +37,7 @@ impl Stats {
             Kind::Brace => self.braces += 1,
             Kind::Typedef => self.typedef += 1,
             Kind::Comment => self.comments += 1,
+            Kind::LongLine => self.long_lines += 1,
             Kind::Prototypes => self.prototypes += 1,
             Kind::LongFunction => self.long_functions += 1,
             Kind::TooManyFunctions => self.many_functions += 1,
@@ -46,8 +49,8 @@ impl Display for Stats {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Detected {} formatting errors:\n\t{} gotos\n\t{} casts\n\t{} misplaced braces\n\t{} typedefs\n\t{} miswritten comments\n\t{} function prototypes\n\t{} functions with long body\n\t{} files packed with too many functions\n",
-             Pretty::fail(&format!("{}", self.total)), self.goto, self.casts, self.braces, self.typedef, self.comments, self.prototypes, self.long_functions, self.many_functions,
+            "Detected {} formatting errors:\n\t{} gotos\n\t{} casts\n\t{} misplaced braces\n\t{} typedefs\n\t{} miswritten comments\n\t{} long lines\n\t{} function prototypes\n\t{} functions with long body\n\t{} files packed with too many functions\n",
+             Pretty::fail(&format!("{}", self.total)), self.goto, self.casts, self.braces, self.typedef, self.comments, self.long_lines, self.prototypes, self.long_functions, self.many_functions,
         )
     }
 }

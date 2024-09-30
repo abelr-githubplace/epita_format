@@ -7,7 +7,7 @@
 typedef struct
 {
     float value;
-} FloatClass; // brace should not be followed by anything but a semicolon or comment
+} FloatClass; // brace should not be followed by anything but a semicolon or comment and this line is now too long
 
 float factorial(float n);
 float addFloatClassToFloat(FloatClass f, float b);

@@ -73,6 +73,13 @@ impl Data {
         self.line_count
     }
 
+    pub fn add_func_count_error(&mut self) -> usize {
+        if self.func_count > MAX_FUNCTIONS_ALLOWED {
+            return self.func_count - MAX_FUNCTIONS_ALLOWED;
+        }
+        0
+    }
+
     // Calls for rule functions
     rule!(rule_opened_or_closed_brace, is_opened_or_closed_brace);
     rule!(rule_has_brace, has_brace);
@@ -86,6 +93,7 @@ impl Data {
     rule!(rule_func_proto, is_func_proto);
     rule!(rule_goto, is_goto);
     rule!(rule_typedef, is_typedef);
+    rule!(rule_line_80, is_line_80);
 
     /// Rule function: is for misformatted multiline comments
     fn rule_comment(&mut self) -> bool {
@@ -112,13 +120,10 @@ impl Data {
     }
 
     /// Rule function: check for number of functions
-    fn rule_func_count(&mut self) -> bool {
-        if self.config.is_func_decl(&self.line) {
+    fn rule_func_count(&mut self) {
+        if self.rule_func_proto() {
             self.func_count += 1;
-            self.func_len = 0;
-            return self.func_count < MAX_FUNCTIONS_ALLOWED;
         }
-        true
     }
 
     /// Rule function: check for length of functions
@@ -160,18 +165,16 @@ pub fn rules(line: &str, data: &mut Data, errors: &mut SyntaxError) {
     if data.rule_cast() {
         errors.add(data, Kind::Cast, "No casts allowed.");
     }
-    if data.ftype == FTYPE::C && data.rule_func_proto() {
-        errors.add(data, Kind::Prototypes, "No function prototypes allowed.");
+    if data.ftype == FTYPE::C {
+        if data.rule_func_proto() {
+            errors.add(data, Kind::Prototypes, "No function prototypes allowed.");
+        }
+        if !data.rule_func_len() {
+            errors.add(data, Kind::LongFunction, "More than 25 lines in function.");
+        }
     }
-    if data.ftype == FTYPE::C && !data.rule_func_len() {
-        errors.add(data, Kind::LongFunction, "More than 25 lines in function.");
-    }
-    if data.ftype == FTYPE::H && !data.rule_func_count() {
-        errors.add(
-            data,
-            Kind::TooManyFunctions,
-            "More than 10 functions in file.",
-        );
+    if data.ftype == FTYPE::H {
+        data.rule_func_count();
     }
     if data.rule_goto() {
         errors.add(data, Kind::Goto, "No goto statements allowed.");
@@ -181,6 +184,13 @@ pub fn rules(line: &str, data: &mut Data, errors: &mut SyntaxError) {
             data,
             Kind::Typedef,
             "No typedef alias allowed for structs or unions.",
+        );
+    }
+    if !data.rule_line_80() {
+        errors.add(
+            data,
+            Kind::LongLine,
+            "Line must be less than 80 characters long.",
         );
     }
 

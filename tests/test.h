@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <math.h>
 
-typedef struct {float value;} FloatClass; // brace should not be followed by anything but a semicolon or comment
+typedef struct {float value;} FloatClass; // brace should not be followed by anything but a semicolon or comment and this line is now too long
 float factorial(float n);
 float addFloatClassToFloat(FloatClass f, float b);
 float addFloatClassToInt(FloatClass f, int b);

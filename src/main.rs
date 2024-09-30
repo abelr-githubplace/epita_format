@@ -1,6 +1,6 @@
 use epita_format::parse::{
     data::{rules, Data},
-    syntax::SyntaxError,
+    syntax::{Kind, SyntaxError},
 };
 use std::{
     fs::File,
@@ -23,6 +23,14 @@ fn check(filename: &str, data: &mut Data, errors: &mut SyntaxError) -> io::Resul
     for line in reader.lines() {
         // Check rules
         rules(&line?, data, errors);
+    }
+    let func_overflow = data.add_func_count_error();
+    if func_overflow > 0 {
+        errors.add(
+            data,
+            Kind::TooManyFunctions,
+            &format!("Too many functions in this file {}", func_overflow),
+        );
     }
     Ok(())
 }
