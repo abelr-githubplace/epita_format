@@ -1,12 +1,14 @@
 use super::data::Data;
 use crate::print::pretty::Pretty;
-use std::{collections::HashMap, fmt::Display};
+use std::{collections::BTreeMap, fmt::Display};
 
 pub enum Kind {
     None,
     Cast,
+    Goto,
     Brace,
     Comment,
+    Typedef,
     Prototypes,
     LongFunction,
     TooManyFunctions,
@@ -15,8 +17,10 @@ pub enum Kind {
 #[derive(Default)]
 struct Stats {
     total: usize,
+    goto: usize,
     casts: usize,
     braces: usize,
+    typedef: usize,
     comments: usize,
     prototypes: usize,
     long_functions: usize,
@@ -26,8 +30,10 @@ impl Stats {
     fn map(&mut self, kind: Kind) {
         match kind {
             Kind::None => (),
+            Kind::Goto => self.goto += 1,
             Kind::Cast => self.casts += 1,
             Kind::Brace => self.braces += 1,
+            Kind::Typedef => self.typedef += 1,
             Kind::Comment => self.comments += 1,
             Kind::Prototypes => self.prototypes += 1,
             Kind::LongFunction => self.long_functions += 1,
@@ -40,8 +46,8 @@ impl Display for Stats {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Detected {} formatting errors:\n\t{} casts\n\t{} misplaced braces\n\t{} miswritten comments\n\t{} function prototypes\n\t{} too long function related errors\n\t{} files packed with too many functions\n",
-             Pretty::fail(&format!("{}", self.total)), self.casts, self.braces, self.comments, self.prototypes, self.long_functions, self.many_functions,
+            "Detected {} formatting errors:\n\t{} gotos\n\t{} casts\n\t{} misplaced braces\n\t{} typedefs\n\t{} miswritten comments\n\t{} function prototypes\n\t{} functions with long body\n\t{} files packed with too many functions\n",
+             Pretty::fail(&format!("{}", self.total)), self.goto, self.casts, self.braces, self.typedef, self.comments, self.prototypes, self.long_functions, self.many_functions,
         )
     }
 }
@@ -49,7 +55,7 @@ impl Display for Stats {
 /// SyntaxError class
 #[derive(Default)]
 pub struct SyntaxError {
-    map: HashMap<String, HashMap<usize, Vec<String>>>,
+    map: BTreeMap<String, BTreeMap<usize, Vec<String>>>,
     stats: Stats,
 }
 impl SyntaxError {
@@ -69,7 +75,7 @@ impl Display for SyntaxError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "{}{}",
+            "{}{}\n{}",
             {
                 let mut out = String::new();
                 for (file, lines) in self.map.iter() {
@@ -100,6 +106,9 @@ impl Display for SyntaxError {
                         )
                     }
                 }
+            },
+            {
+                &format!("{} This is not an absolute truth and should only serve as help.\nPlease refer to the 'C Coding Syle' for more info (https://intra.forge.epita.fr/epita-ing-assistants-acu/documents)", Pretty::warn("Warning:"))
             }
         )
     }
